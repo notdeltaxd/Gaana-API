@@ -1,4 +1,4 @@
-# 🎵 Gaana API
+# 🎵 Unofficial Gaana API
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
