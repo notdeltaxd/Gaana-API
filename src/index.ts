@@ -36,7 +36,7 @@ app.use('*', errorHandler)
 app.get('/', (c) => {
   return c.json({
     message: '🎵 Gaana API',
-    version: '2.0.0',
+    version: '1.0.0',
     status: 'running',
     documentation: 'https://github.com/notdeltaxd/Gaana-API',
     endpoints: {
