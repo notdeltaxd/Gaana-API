@@ -50,6 +50,12 @@ bun run dev
 
 ### Deployment to Vercel
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/notdeltaxd/Gaana-API)
+
+**One-click deployment:** Click the button above to deploy instantly to Vercel.
+
+**Manual deployment:**
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -57,6 +63,19 @@ npm i -g vercel
 # Deploy
 vercel deploy
 ```
+
+**⚠️ Important - Set Function Region to Mumbai:**
+
+Since Gaana is an Indian music streaming platform, it's recommended to host your project in the Mumbai region for better performance:
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** → **Functions**
+3. Under **Function Region**, select **Asia Pacific (Mumbai) - ap-south-1**
+4. Unselect the default region
+5. Click **Save Changes**
+6. Redeploy your project
+
+This ensures faster API response times when accessing Gaana's servers.
 
 ---
 
