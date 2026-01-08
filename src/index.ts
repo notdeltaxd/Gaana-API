@@ -58,6 +58,9 @@ apiApp.get('/', (c) => {
         charts: 'GET /api/charts?limit=10',
         newReleases: 'GET /api/new-releases?language=hi'
       },
+      media_file: {
+        stream: 'GET /api/stream?track_id=<track_id>&quality=<quality> OR GET /api/stream/:trackId?quality=<quality> - Returns segment URLs (JSON)',
+      },
       system: {
         health: 'GET /api/health'
       }

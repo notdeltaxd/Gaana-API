@@ -301,8 +301,18 @@ curl "http://localhost:3000/api/stream/29797868?quality=medium"
 {
   "quality": "high",
   "bitRate": "128",
-  "url": "https://vodhlsgaana-ebw.akamaized.net/hls/.../128.mp4.master.m3u8?hdnts=...",
-  "format": "mp4_aac"
+  "hlsUrl": "https://vodhlsgaana-ebw.akamaized.net/hls/.../index.m3u8",
+  "url": "https://vodhlsgaana-ebw.akamaized.net/hls/.../segment-0.m4s",
+  "initUrl": "https://vodhlsgaana-ebw.akamaized.net/hls/.../init.mp4",
+  "segments": [
+    {
+      "url": "https://vodhlsgaana-ebw.akamaized.net/hls/.../segment-0.m4s",
+      "durationMs": 6000
+    },
+    ...
+  ],
+  "durationMs": 180000,
+  "format": "m4s"
 }
 ```
 
