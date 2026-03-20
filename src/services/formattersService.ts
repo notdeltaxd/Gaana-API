@@ -117,6 +117,64 @@ export class FormattersService extends BaseService {
   }
 
   /**
+   * Format a single album item from apiv2 albumList response.
+   */
+  formatJsonAlbumListItem(album: Record<string, unknown>): Record<string, unknown> {
+    const artists = Array.isArray(album.artist)
+      ? (album.artist as Array<{ name?: string; seokey?: string; artist_id?: string }>)
+          .filter((artist) => Boolean(artist?.name))
+          .map((artist) => ({
+            name: artist.name || '',
+            seokey: artist.seokey || '',
+            artist_id: artist.artist_id || ''
+          }))
+      : []
+
+    const customArtworks = (album.custom_artworks as Record<string, string> | undefined) || {}
+    const artworkUrl =
+      customArtworks['480x480'] ||
+      customArtworks['175x175'] ||
+      customArtworks['110x110'] ||
+      customArtworks['80x80'] ||
+      customArtworks['40x40'] ||
+      (album.artwork as string) ||
+      ''
+
+    return {
+      album_id: String(album.album_id || ''),
+      seokey: String(album.seokey || ''),
+      title: String(album.title || ''),
+      language: String(album.language || ''),
+      release_date: String(album.release_date || ''),
+      year: String(album.year || ''),
+      track_count: Number(album.trackcount || 0),
+      duration: Number(album.duration || 0),
+      artists_string: artists.map((artist) => artist.name).join(', '),
+      artworkUrl,
+      album_url: `https://gaana.com/album/${String(album.seokey || '')}`,
+      artists
+    }
+  }
+
+  /**
+   * Format album list API response.
+   */
+  formatJsonAlbumList(albums: unknown[], count: number, language: string, page: number): Record<string, unknown> {
+    const formattedAlbums = albums
+      .filter((album): album is Record<string, unknown> => Boolean(album) && typeof album === 'object')
+      .map((album) => this.formatJsonAlbumListItem(album))
+
+    return {
+      success: true,
+      data: formattedAlbums,
+      count,
+      language,
+      page,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  /**
    * Format album detail API response - simplified with only essential fields
    * Includes: basic info, artist info, duration, artwork
    * Used for search results

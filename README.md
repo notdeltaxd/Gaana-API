@@ -271,6 +271,54 @@ Get new releases (songs and albums).
 }
 ```
 
+### 💿 Album List By Language
+
+**GET** `/api/album-list?language=hindi&page=0`
+
+Fetches Gaana's language-specific album list (`type=albumList`) and returns a normalized response.
+
+**Query Parameters:**
+
+- `language` (optional) - Language slug (default: `hindi`)
+  - Supported: `all`, `hindi`, `english`, `punjabi`, `telugu`, `tamil`, `bhojpuri`, `bengali`, `malayalam`, `kannada`, `marathi`, `gujarati`, `haryanvi`, `urdu`, `assamese`, `rajasthani`, `odia`
+- `page` (optional) - Zero-based page index (default: `0`)
+
+**Examples:**
+
+```bash
+curl "http://localhost:3000/api/album-list?language=hindi&page=0"
+curl "http://localhost:3000/api/album-list?language=punjabi&page=0"
+curl "http://localhost:3000/api/album-list?language=all&page=0"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "album_id": "13923727",
+      "seokey": "dhurandhar-hindi-2025",
+      "title": "Dhurandhar",
+      "language": "Hindi",
+      "release_date": "2025-12-05",
+      "year": "2025",
+      "track_count": 11,
+      "duration": 2335,
+      "artists_string": "Shashwat Sachdev",
+      "artworkUrl": "http://a10.gaanacdn.com/images/albums/27/13923727/crop_480x480_13923727.jpg",
+      "album_url": "https://gaana.com/album/dhurandhar-hindi-2025",
+      "artists": [{ "name": "Shashwat Sachdev", "seokey": "shashwat-sachdev", "artist_id": "1295950" }]
+    }
+  ],
+  "count": 14821780,
+  "language": "hindi",
+  "page": 0,
+  "timestamp": "2026-03-20T00:00:00.000Z"
+}
+```
+
 ### 🎧 Stream URL
 
 **GET** `/api/stream/:trackId` or `GET /api/stream?track_id=...`

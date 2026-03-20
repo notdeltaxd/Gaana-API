@@ -39,6 +39,13 @@ export const validationSchemas = {
     .min(1, 'Limit must be at least 1')
     .max(100, 'Limit cannot exceed 100'),
 
+  // Page validation - zero-based pagination
+  page: z
+    .number()
+    .int('Page must be an integer')
+    .min(0, 'Page must be at least 0')
+    .max(1000, 'Page cannot exceed 1000'),
+
   // Language validation - optional, max 50 chars
   language: z.string().max(50, 'Language code is too long').optional(),
 

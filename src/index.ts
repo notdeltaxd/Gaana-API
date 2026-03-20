@@ -56,10 +56,12 @@ apiApp.get('/', (c) => {
       browse: {
         trending: 'GET /api/trending?language=hi&limit=10',
         charts: 'GET /api/charts?limit=10',
-        newReleases: 'GET /api/new-releases?language=hi'
+        newReleases: 'GET /api/new-releases?language=hi',
+        albumList: 'GET /api/album-list?language=hindi&page=0'
       },
       media_file: {
-        stream: 'GET /api/stream?track_id=<track_id>&quality=<quality> OR GET /api/stream/:trackId?quality=<quality> - Returns segment URLs (JSON)',
+        stream:
+          'GET /api/stream?track_id=<track_id>&quality=<quality> OR GET /api/stream/:trackId?quality=<quality> - Returns segment URLs (JSON)'
       },
       system: {
         health: 'GET /api/health'

@@ -42,7 +42,8 @@ export const gaanaService = {
   // Browse operations
   getTrendingTracks: (language?: string, limit?: number) => browseService.getTrendingTracks(language, limit),
   getCharts: (limit?: number) => browseService.getCharts(limit),
-  getNewReleases: (language?: string) => browseService.getNewReleases(language)
+  getNewReleases: (language?: string) => browseService.getNewReleases(language),
+  getAlbumList: (language?: string, page?: number) => browseService.getAlbumList(language, page)
 }
 
 export { functions, errors }

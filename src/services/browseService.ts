@@ -45,6 +45,43 @@ export class BrowseService extends BaseService {
   }
 
   /**
+   * Get album list by language.
+   * Returns normalized album list by language.
+   */
+  async getAlbumList(language?: string, page?: number): Promise<Record<string, unknown>> {
+    const lang = (language || 'hindi').trim().toLowerCase()
+    const pageNumber = page ?? 0
+    const isAllLanguage = lang === 'all'
+    const url = isAllLanguage
+      ? `${apiEndpoints.albumListUrl}&page=${pageNumber}`
+      : `${apiEndpoints.albumListUrl}&language=${encodeURIComponent(lang)}&page=${pageNumber}`
+
+    const result = await this.fetchJson(
+      url,
+      'POST',
+      {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Referer: isAllLanguage ? 'https://gaana.com/album' : `https://gaana.com/album/${lang}`
+      },
+      20000
+    )
+
+    if (!result || typeof result !== 'object') {
+      return this.formatters.formatJsonAlbumList([], 0, lang, pageNumber)
+    }
+
+    const response = result as {
+      album?: unknown[]
+      count?: number
+    }
+
+    const albums = Array.isArray(response.album) ? response.album : []
+    const totalCount = typeof response.count === 'number' ? response.count : 0
+
+    return this.formatters.formatJsonAlbumList(albums, totalCount, lang, pageNumber)
+  }
+
+  /**
    * Get charts
    */
   async getCharts(limit?: number): Promise<unknown[]> {

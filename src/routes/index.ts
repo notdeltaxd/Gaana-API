@@ -24,6 +24,7 @@ import { handleGetArtist } from '../handlers/artists.js'
 import { handleTrending } from '../handlers/trending.js'
 import { handleCharts } from '../handlers/charts.js'
 import { handleNewReleases } from '../handlers/newreleases.js'
+import { handleAlbumList } from '../handlers/albumList.js'
 import { handleHealth } from '../handlers/health.js'
 import { handleGetStream } from '../handlers/stream.js'
 
@@ -75,9 +76,11 @@ router.get('/artists/:seokey', handleGetArtist)
 //   GET /api/trending?language=hi&limit=20
 //   GET /api/charts?limit=30
 //   GET /api/new-releases?language=en
+//   GET /api/album-list?language=hindi&page=0
 router.get('/trending', handleTrending)
 router.get('/charts', handleCharts)
 router.get('/new-releases', handleNewReleases)
+router.get('/album-list', handleAlbumList)
 
 // Stream URL endpoint - get decrypted HLS stream URL by track ID
 // Usage:
@@ -88,4 +91,3 @@ router.get('/stream', handleGetStream)
 router.get('/stream/:trackId', handleGetStream)
 
 export default router
-
