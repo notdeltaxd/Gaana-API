@@ -439,7 +439,7 @@ curl "http://localhost:3000/api/stream/29797868?quality=medium"
 }
 ```
 
-> **Note:** The `track_id` can be obtained from the song details endpoint (`/api/songs/:seokey`). Song details also include a `media_urls` array with the decrypted stream URL.
+> **Note:** The `track_id` can be obtained from the song details endpoint (`/api/songs/:seokey`).
 
 ### 🏥 Health
 
