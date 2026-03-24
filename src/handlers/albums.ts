@@ -50,7 +50,7 @@ export async function handleGetAlbum(c: Context) {
       return c.json(albumInfo, 404)
     }
 
-    return c.json(albumInfo)
+    return c.json(gaanaService.formatResponse(albumInfo))
   } catch (err) {
     console.error('Get album error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get album' }, 500)

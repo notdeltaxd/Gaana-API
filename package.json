@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/notdeltaxd/Gaana-API.git"
   },
+  "homepage": "https://github.com/notdeltaxd/Gaana-API",
   "keywords": [
     "gaana",
     "api",
@@ -19,7 +20,7 @@
     "rest-api"
   ],
   "author": "notdeltaxd",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "tsc",

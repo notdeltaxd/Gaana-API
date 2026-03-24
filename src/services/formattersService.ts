@@ -16,10 +16,6 @@ import type { ArtistDetail, TrackArtist } from '../types/index.js'
  * @class FormattersService
  */
 export class FormattersService extends BaseService {
-  /**
-   * Helper function to get the best available artwork URL
-   * Priority: large > medium > small
-   */
   private getArtworkUrl(small?: string, medium?: string, large?: string): string {
     if (large) return large
     if (medium) return medium
@@ -28,9 +24,53 @@ export class FormattersService extends BaseService {
   }
 
   /**
-   * Formats the playlist search API response to return playlist summaries.
+   * Common metadata for all responses.
    */
-  formatJsonPlaylistSearch(result: unknown, limit: number): Array<Record<string, unknown>> {
+  private getCommonMeta() {
+    return {
+      project: 'Unofficial Gaana API',
+      version: '1.0.0',
+      author: 'notdeltaxd',
+      repository: 'https://github.com/notdeltaxd/Gaana-API',
+      license: 'Apache-2.0',
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  /**
+   * Wrap data in a standardized response format with metadata.
+   */
+  public wrapResponse(data: any, extraMeta: Record<string, any> = {}): Record<string, any> {
+    if (data && data.error) {
+      return {
+        success: false,
+        error: data.error,
+        meta: this.getCommonMeta()
+      }
+    }
+
+    return {
+      success: true,
+      data,
+      meta: {
+        ...this.getCommonMeta(),
+        ...extraMeta
+      }
+    }
+  }
+
+  /**
+   * Public format playlist search API response - wrapped with metadata.
+   */
+  formatJsonPlaylistSearch(result: unknown, limit: number): Array<Record<string, unknown>> | Record<string, unknown> {
+    const data = this._formatJsonPlaylistSearch(result, limit)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format the playlist search API response to return playlist summaries.
+   */
+  public _formatJsonPlaylistSearch(result: unknown, limit: number): Array<Record<string, unknown>> {
     if (!result || typeof result !== 'object') return []
     const gr = (result as { gr?: Array<{ gd?: Array<any> }> }).gr ?? []
     if (!gr.length || !gr[0].gd) return []
@@ -159,19 +199,21 @@ export class FormattersService extends BaseService {
   /**
    * Format album list API response.
    */
+  /**
+   * Public format album list API response - wrapped with metadata.
+   */
   formatJsonAlbumList(albums: unknown[], count: number, language: string, page: number): Record<string, unknown> {
-    const formattedAlbums = albums
+    const data = this._formatJsonAlbumList(albums, count, language, page)
+    return this.wrapResponse(data, { count, language, page })
+  }
+
+  /**
+   * Internal format album list API response.
+   */
+  _formatJsonAlbumList(albums: unknown[], count: number, language: string, page: number): unknown[] {
+    return albums
       .filter((album): album is Record<string, unknown> => Boolean(album) && typeof album === 'object')
       .map((album) => this.formatJsonAlbumListItem(album))
-
-    return {
-      success: true,
-      data: formattedAlbums,
-      count,
-      language,
-      page,
-      timestamp: new Date().toISOString()
-    }
   }
 
   /**
@@ -179,7 +221,18 @@ export class FormattersService extends BaseService {
    * Includes: basic info, artist info, duration, artwork
    * Used for search results
    */
+  /**
+   * Public format album details API response - wrapped with metadata.
+   */
   async formatJsonAlbumDetails(results: unknown): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonAlbumDetails(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format album detail API response - simplified with only essential fields
+   */
+  public async _formatJsonAlbumDetails(results: unknown): Promise<Record<string, unknown>> {
     if (!results || typeof results !== 'object') return {}
     const r = results as {
       album: {
@@ -269,6 +322,14 @@ export class FormattersService extends BaseService {
    * Format album API response - full details
    */
   async formatJsonAlbums(results: unknown, info: boolean): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonAlbums(results, info)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format album API response - full details
+   */
+  public async _formatJsonAlbums(results: unknown, info: boolean): Promise<Record<string, unknown>> {
     if (!results || typeof results !== 'object') return {}
     const r = results as {
       album: {
@@ -398,22 +459,23 @@ export class FormattersService extends BaseService {
     return data
   }
 
-  /**
-   * Format song detail API response - same format as song search/details
-   * Used for /api/songs/:seokey endpoint
-   * Returns exactly the same structure as formatJsonSongDetails for consistency
-   */
   async formatJsonSongFullDetails(results: Record<string, unknown>): Promise<Record<string, unknown>> {
-    // Return exactly the same format as song search/details
+    // Return exactly the same format as song details, wrapped with meta
     return await this.formatJsonSongDetails(results)
   }
 
   /**
-   * Format song detail API response - simplified with only essential fields
-   * Includes: basic info, album info, artist info, duration, artwork
-   * Used for search results
+   * Public format song detail API response - wrapped with metadata.
    */
   async formatJsonSongDetails(results: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonSongDetails(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format song detail API response - simplified with only essential fields
+   */
+  public async _formatJsonSongDetails(results: Record<string, unknown>): Promise<Record<string, unknown>> {
     const data: Record<string, unknown> = {}
 
     try {
@@ -511,7 +573,18 @@ export class FormattersService extends BaseService {
   /**
    * Format chart API response
    */
+  /**
+   * Public format chart API response - wrapped with metadata.
+   */
   async formatJsonCharts(results: unknown): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonCharts(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format chart API response
+   */
+  async _formatJsonCharts(results: unknown): Promise<Record<string, unknown>> {
     if (!results || typeof results !== 'object') return {}
     const r = results as {
       seokey: string
@@ -547,7 +620,19 @@ export class FormattersService extends BaseService {
    * Format playlist API response
    * Tracks are already included in the response, so format them directly
    */
+  /**
+   * Public format playlist API response - wrapped with metadata.
+   */
   async formatJsonPlaylists(results: unknown): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonPlaylists(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format playlist API response
+   * Tracks are already included in the response, so format them directly
+   */
+  public async _formatJsonPlaylists(results: unknown): Promise<Record<string, unknown>> {
     if (!results || typeof results !== 'object') return {}
     const r = results as {
       playlist: {
@@ -598,8 +683,8 @@ export class FormattersService extends BaseService {
     for (let i = 0; i < trackCount && i < r.tracks.length; i++) {
       try {
         const track = r.tracks[i]
-        // Format each track using the same formatter as song details
-        const formattedTrack = await this.formatJsonSongDetails(track)
+        // Format each track using the same formatter as song details (internal/unwrapped)
+        const formattedTrack = await this._formatJsonSongDetails(track)
         if (formattedTrack && !formattedTrack.error) {
           formattedTracks.push(formattedTrack)
         }
@@ -609,50 +694,108 @@ export class FormattersService extends BaseService {
     }
 
     // Include tracks inside the playlist object
-    return {
+    return this.wrapResponse({
       playlist: {
         ...playlistInfo,
         tracks: formattedTracks
       }
-    }
+    })
   }
 
   /**
-   * Format new releases API response
+   * Helper to extract value from entity_info array by key.
    */
-  async formatJsonNewReleases(results: unknown): Promise<Record<string, unknown>> {
-    if (!results || typeof results !== 'object') return {}
-    const r = results as {
-      entities: Array<{ entity_type: string; seokey: string }>
+  private getEntityInfoValue(entityInfo: Array<{ key: string; value?: unknown }>, key: string): unknown {
+    return entityInfo?.find((info) => info.key === key)?.value
+  }
+
+  /**
+   * Formats a single entity (AL or TR) from miscNewRelease response.
+   */
+  async formatJsonNewReleaseEntity(entity: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const type = String(entity.entity_type || '')
+    const entityInfo = (entity.entity_info as Array<{ key: string; value?: unknown }>) || []
+
+    const data: Record<string, unknown> = {
+      type: type === 'AL' ? 'album' : 'track',
+      entity_id: String(entity.entity_id || ''),
+      seokey: String(entity.seokey || ''),
+      title: String(entity.name || ''),
+      language: String(entity.language || ''),
+      artworkUrl: String(entity.artwork_medium || entity.artwork || '')
     }
-    const trackSeokeys: string[] = []
-    const albumSeokeys: string[] = []
-    const limit = r.entities.length
-    for (let i = 0; i < limit; i++) {
-      try {
-        if (r.entities[i].entity_type === 'AL') {
-          albumSeokeys.push(r.entities[i].seokey)
-        } else if (r.entities[i].entity_type === 'TR') {
-          trackSeokeys.push(r.entities[i].seokey)
-        }
-      } catch {
-        // skip
+
+    if (type === 'AL') {
+      // Album specific fields
+      const artists = (this.getEntityInfoValue(entityInfo, 'primaryartist') as Array<{ name: string }>) || []
+      data.artists = artists.map((a) => a.name).join(', ')
+      data.album_url = `https://gaana.com/album/${data.seokey}`
+    } else if (type === 'TR') {
+      // Track specific fields
+      const artists = (this.getEntityInfoValue(entityInfo, 'artist') as Array<{ name: string }>) || []
+      data.artists = artists.map((a) => a.name).join(', ')
+
+      const albumInfo = (this.getEntityInfoValue(entityInfo, 'album') as Array<{
+        name: string
+        album_seokey: string
+        album_id: string
+      }>)?.[0]
+
+      data.album = albumInfo?.name || ''
+      data.album_seokey = albumInfo?.album_seokey || ''
+      data.album_id = albumInfo?.album_id || ''
+      data.duration = Number(this.getEntityInfoValue(entityInfo, 'duration') || 0)
+      data.is_explicit = this.functions.isExplicit(Number(this.getEntityInfoValue(entityInfo, 'parental_warning') || 0))
+
+      data.song_url = `https://gaana.com/song/${data.seokey}`
+      if (data.album_seokey) {
+        data.album_url = `https://gaana.com/album/${data.album_seokey}`
       }
     }
-    if (trackSeokeys.length === 0 && albumSeokeys.length === 0) {
-      return { error: this.errors.noResults() }
-    }
-    // Return seokeys for detailsService to fetch
-    return {
-      trackSeokeys,
-      albumSeokeys
-    }
+
+    return data
+  }
+
+  /**
+   * Format new releases API response - optimized for paginated results.
+   */
+  /**
+   * Public format new releases API response - optimized for paginated results.
+   */
+  async formatJsonNewReleases(results: unknown, page?: number, limit?: number): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonNewReleases(results)
+    return this.wrapResponse(data, {
+      count: (results as any)?.count || data.length,
+      page,
+      limit
+    })
+  }
+
+  /**
+   * Internal format new releases API response.
+   */
+  async _formatJsonNewReleases(results: unknown): Promise<unknown[]> {
+    if (!results || typeof results !== 'object') return []
+    const r = results as { entities: Array<Record<string, unknown>> }
+    if (!r.entities || !Array.isArray(r.entities)) return []
+    return await Promise.all(r.entities.map((entity) => this.formatJsonNewReleaseEntity(entity)))
   }
 
   /**
    * Format trending API response
    */
+  /**
+   * Public format trending API response - wrapped with metadata.
+   */
   async formatJsonTrending(results: unknown): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonTrending(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format trending API response
+   */
+  async _formatJsonTrending(results: unknown): Promise<Record<string, unknown>> {
     if (!results || typeof results !== 'object') return {}
     const r = results as { entities: Array<{ seokey: string }> }
     const trackSeokeys: string[] = []
@@ -673,8 +816,19 @@ export class FormattersService extends BaseService {
   /**
    * Format artist details API response
    */
+  /**
+   * Public format artist details API response - wrapped with metadata.
+   */
   async formatJsonArtistInfo(results: unknown): Promise<Record<string, unknown>> {
-    if (!results || typeof results !== 'object') return { error: this.errors.noResults() }
+    const data = await this._formatJsonArtistInfo(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format artist details API response
+   */
+  public async _formatJsonArtistInfo(results: unknown): Promise<Record<string, unknown>> {
+    if (!results || typeof results !== 'object') return this.wrapResponse({ error: this.errors.noResults() })
     const r = results as {
       artist?: Array<{
         artist_id?: string
@@ -688,7 +842,7 @@ export class FormattersService extends BaseService {
     }
 
     if (!r.artist?.[0]) {
-      return { error: this.errors.noResults() }
+      return this.wrapResponse({ error: this.errors.noResults() })
     }
 
     const artist = r.artist[0]
@@ -700,13 +854,24 @@ export class FormattersService extends BaseService {
       artist_url: `https://gaana.com/artist/${artist.seokey || ''}`
     }
 
-    return data
+    return this.wrapResponse(data)
   }
 
   /**
    * Format artist top tracks API response - same format as song details
    */
-  async formatJsonArtistTopTracks(results: unknown): Promise<Array<Record<string, unknown>>> {
+  /**
+   * Public format artist top tracks API response - wrapped with metadata.
+   */
+  async formatJsonArtistTopTracks(results: unknown): Promise<Array<Record<string, unknown>> | Record<string, unknown>> {
+    const data = await this._formatJsonArtistTopTracks(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format artist top tracks API response - same format as song details
+   */
+  public async _formatJsonArtistTopTracks(results: unknown): Promise<Array<Record<string, unknown>>> {
     if (!results || typeof results !== 'object') return []
     const r = results as {
       entities?: Array<{
@@ -814,5 +979,101 @@ export class FormattersService extends BaseService {
     }
 
     return tracks
+  }
+
+  /**
+   * Format lyrics list API response.
+   */
+  /**
+   * Public format lyrics list API response - wrapped with metadata.
+   */
+  async formatJsonLyricsList(results: unknown, page: number): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonLyricsList(results, page)
+    return this.wrapResponse(data, {
+      count: (results as any)?.count || data.length,
+      page
+    })
+  }
+
+  /**
+   * Internal format lyrics list API response.
+   */
+  async _formatJsonLyricsList(results: unknown, page: number): Promise<unknown[]> {
+    if (!results || typeof results !== 'object') return []
+    const r = results as { tracks?: Array<Record<string, unknown>> }
+    const tracks = Array.isArray(r.tracks) ? r.tracks : []
+    return await Promise.all(
+      tracks.map(async (track) => {
+        const artwork = (track.atw as string) || ''
+        let artworkUrl = artwork
+        if (artwork.includes('size_m.jpg')) {
+          artworkUrl = artwork.replace('size_m.jpg', 'size_l.jpg')
+        } else if (artwork.includes('size_s.jpg')) {
+          artworkUrl = artwork.replace('size_s.jpg', 'size_l.jpg')
+        }
+
+        return {
+          track_id: String(track.track_id || ''),
+          seokey: String(track.seokey || ''),
+          title: String(track.track_title || ''),
+          artworkUrl: artworkUrl,
+          song_url: `https://gaana.com/song/${track.seokey}`,
+          lyrics_url: `https://gaana.com/lyrics/${track.seokey}`
+        }
+      })
+    )
+  }
+
+  /**
+   * Format song lyrics API response.
+   */
+  /**
+   * Public format song lyrics API response - wrapped with metadata.
+   */
+  async formatJsonSongLyrics(results: unknown): Promise<Record<string, unknown>> {
+    const data = await this._formatJsonSongLyrics(results)
+    return this.wrapResponse(data)
+  }
+
+  /**
+   * Internal format song lyrics API response.
+   */
+  async _formatJsonSongLyrics(results: unknown): Promise<Record<string, unknown>> {
+    if (!results || typeof results !== 'object') return { error: this.errors.noResults() }
+    const r = results as {
+      flag?: boolean
+      status?: number
+      album_title?: string
+      track_title?: string
+      lyrics_html?: string
+      language?: string
+    }
+
+    // Gaana returns flag: true or status: 1 for success
+    if (r.flag === false || r.status === 0) {
+      return { error: 'Lyrics not found for this song' }
+    }
+
+    // Clean up lyrics HTML - convert to plain text with newlines
+    let lyrics = r.lyrics_html || ''
+    lyrics = lyrics
+      .replace(/<p>/g, '') // Remove opening <p>
+      .replace(/<\/p>/g, '\n\n') // Replace closing </p> with double newline
+      .replace(/<br\s*\/?>/g, '\n') // Replace <br> with single newline
+      .replace(/&nbsp;/g, ' ') // Decode common entities
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/<[^>]*>?/gm, '') // Strip any remaining HTML tags
+      .trim()
+
+    return {
+      album: r.album_title || '',
+      title: r.track_title || '',
+      lyrics: lyrics,
+      language: r.language || ''
+    }
   }
 }

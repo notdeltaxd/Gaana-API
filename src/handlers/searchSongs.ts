@@ -40,12 +40,7 @@ export async function handleSearchSongs(c: Context) {
   try {
     const songs = await gaanaService.searchSongs(queryValidation.data, limitValidation.data)
 
-    return c.json({
-      success: true,
-      data: songs,
-      count: songs.length,
-      timestamp: new Date().toISOString()
-    })
+    return c.json(gaanaService.formatResponse(songs, { count: songs.length }))
   } catch (err) {
     console.error('Search songs error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Search failed' }, 500)

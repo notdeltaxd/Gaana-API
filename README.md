@@ -1,6 +1,6 @@
 # 🎵 Unofficial Gaana API
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.0+-blue)](https://bun.sh/)
 [![Hono](https://img.shields.io/badge/Hono-4.0+-blue)](https://hono.dev/)
@@ -254,19 +254,94 @@ Get top charts/playlists.
 
 ### 🎁 New Releases
 
-**GET** `/api/new-releases?language=hi`
+Get newly released albums and songs with pagination and language filtering.
 
-Get new releases (songs and albums).
+**Endpoint:** `/api/new-releases`
+
+**Query Parameters:**
+
+- `language` (optional) - Language slug (default: `english`)
+  - Supported: Same as [Album List](#-album-list-by-language)
+- `page` (optional) - Zero-based page index (default: `0`)
+- `limit` (optional) - Number of items per page (default: `40`)
+
+**Example:**
+
+```bash
+curl "http://localhost:3000/api/new-releases?language=punjabi&page=0&limit=10"
+```
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "data": {
-    "tracks": [...],
-    "albums": [...]
-  },
+  "data": [
+    {
+      "type": "track",
+      "entity_id": "73030303",
+      "seokey": "song-seokey",
+      "title": "Song Title",
+      "artists": "Artist Name",
+      "language": "Punjabi",
+      "artworkUrl": "...",
+      "album": "Album Name",
+      "duration": 210,
+      "song_url": "..."
+    }
+  ],
+  "count": 40,
+  "page": 0,
+  "limit": 10,
+  "timestamp": "..."
+}
+```
+
+### 📜 Lyrics
+
+Get a list of songs with lyrics or specific song lyrics.
+
+- **GET** `/api/lyrics?page=0` - Get paginated list of songs with lyrics.
+- **GET** `/api/lyrics/:seokey` - Get lyrics for a specific song.
+
+**Example (Lyrics List):**
+```bash
+curl "http://localhost:3000/api/lyrics?page=0"
+```
+
+**Example (Song Lyrics):**
+```bash
+curl "http://localhost:3000/api/lyrics/eena-meena-deeka-18"
+```
+
+**Response (Song Lyrics):**
+```json
+{
+  "success": true,
+  "album": "...",
+  "title": "...",
+  "lyrics": "Line 1\n\nLine 2\n\n...",
+  "language": "Hindi",
+  "timestamp": "..."
+}
+```
+
+**Response (Lyrics List):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "track_id": "...",
+      "seokey": "...",
+      "title": "...",
+      "artworkUrl": "...",
+      "song_url": "...",
+      "lyrics_url": "..."
+    }
+  ],
+  "count": 312278,
+  "page": 0,
   "timestamp": "..."
 }
 ```
@@ -385,9 +460,18 @@ Check API health status.
 
 ---
 
+## Credits
+
+If you use this API in your project, please credit:
+
+**Unofficial Gaana API** by **notdeltaxd**  
+[https://github.com/notdeltaxd/Gaana-API](https://github.com/notdeltaxd/Gaana-API)
+
+---
+
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
 
 ---
 

@@ -25,6 +25,7 @@ import { handleTrending } from '../handlers/trending.js'
 import { handleCharts } from '../handlers/charts.js'
 import { handleNewReleases } from '../handlers/newreleases.js'
 import { handleAlbumList } from '../handlers/albumList.js'
+import { handleLyricsList, handleSongLyrics } from '../handlers/lyrics.js'
 import { handleHealth } from '../handlers/health.js'
 import { handleGetStream } from '../handlers/stream.js'
 
@@ -81,6 +82,8 @@ router.get('/trending', handleTrending)
 router.get('/charts', handleCharts)
 router.get('/new-releases', handleNewReleases)
 router.get('/album-list', handleAlbumList)
+router.get('/lyrics', handleLyricsList)
+router.get('/lyrics/:seokey', handleSongLyrics)
 
 // Stream URL endpoint - get decrypted HLS stream URL by track ID
 // Usage:

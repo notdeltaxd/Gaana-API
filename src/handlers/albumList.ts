@@ -35,7 +35,7 @@ export async function handleAlbumList(c: Context) {
 
   try {
     const data = await gaanaService.getAlbumList(language, pageValidation.data)
-    return c.json(data)
+    return c.json(gaanaService.formatResponse(data))
   } catch (err) {
     console.error('Album list error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get album list' }, 500)

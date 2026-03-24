@@ -6,30 +6,50 @@
 
 import { Context } from 'hono'
 import { gaanaService } from '../services/instances.js'
-import { validateQueryParam, validationSchemas } from '../utils/validation.js'
+import { validateQueryNumber, validationSchemas } from '../utils/validation.js'
+import { albumListSupportedLanguages, type AlbumListLanguage } from '../constants/languages.js'
 
 /**
  * Handles GET requests for new releases.
- *
- * @param {Context} c - Hono context object
- * @returns {Promise<Response>} JSON response with new releases or error
- *
- * @example
- * ```typescript
- * GET /api/new-releases?language=hi
- * GET /api/new-releases
- * ```
  */
 export async function handleNewReleases(c: Context) {
-  // Validate language (optional)
-  const languageValidation = validateQueryParam(c, 'language', validationSchemas.language, false)
-  if (!languageValidation.success) {
-    return c.json({ error: languageValidation.error }, languageValidation.status)
+  // Validate language (optional, defaults to English if not provided)
+  const rawLanguage = (c.req.query('language') || 'english').trim().toLowerCase()
+  const language = rawLanguage as AlbumListLanguage
+
+  if (!albumListSupportedLanguages.includes(language)) {
+    return c.json(
+      {
+        error: `Unsupported language. Supported languages: ${albumListSupportedLanguages.join(', ')}`
+      },
+      400
+    )
+  }
+
+  // Validate page and limit
+  const pageValidation = validateQueryNumber(c, 'page', validationSchemas.page, 0)
+  if (!pageValidation.success) {
+    return c.json({ error: pageValidation.error }, pageValidation.status)
+  }
+
+  const limitValidation = validateQueryNumber(c, 'limit', validationSchemas.limit, 40)
+  if (!limitValidation.success) {
+    return c.json({ error: limitValidation.error }, limitValidation.status)
   }
 
   try {
-    const newReleasesData = await gaanaService.getNewReleases(languageValidation.data || '')
-    return c.json(newReleasesData)
+    const newReleasesData = await gaanaService.getNewReleases(
+      language,
+      pageValidation.data,
+      limitValidation.data
+    )
+    return c.json(
+      gaanaService.formatResponse(newReleasesData, {
+        count: (newReleasesData as any).length || 0,
+        page: pageValidation.data,
+        limit: limitValidation.data
+      })
+    )
   } catch (err) {
     console.error('New releases error:', err)
     return c.json(

@@ -62,7 +62,7 @@ export async function handleGetSong(c: Context) {
       return c.json(songInfo, 404)
     }
 
-    return c.json(songInfo)
+    return c.json(gaanaService.formatResponse(songInfo))
   } catch (err) {
     console.error('Get song error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get song' }, 500)

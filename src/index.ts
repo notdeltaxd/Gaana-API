@@ -10,6 +10,8 @@ import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 import { errorHandler, logger as customLogger } from './middleware/index.js'
 import router from './routes/index.js'
+import { showBanner } from './utils/banner.js'
+import { gaanaService } from './services/instances.js'
 
 /**
  * API app with base path /api
@@ -24,6 +26,38 @@ apiApp.use('*', prettyJSON())
 apiApp.use('*', customLogger)
 apiApp.use('*', errorHandler)
 
+// Attribution header middleware
+apiApp.use('*', async (c, next) => {
+  c.header(
+    'X-Powered-By',
+    'Unofficial Gaana API - https://github.com/notdeltaxd/Gaana-API'
+  )
+  c.header('X-Project-Author', 'notdeltaxd')
+  c.header('X-Project-Name', 'Unofficial Gaana API')
+  c.header('X-Project-Repository', 'https://github.com/notdeltaxd/Gaana-API')
+  c.header(
+    'Access-Control-Expose-Headers',
+    'X-Powered-By, X-Project-Author, X-Project-Name, X-Project-Repository'
+  )
+  await next()
+})
+
+/**
+ * Credits endpoint - Attribution information.
+ *
+ * @route GET /api/credits
+ * @returns {Object} Credits information object
+ */
+apiApp.get('/credits', (c) => {
+  return c.json(gaanaService.formatResponse({
+    project: 'Unofficial Gaana API',
+    author: 'notdeltaxd',
+    repository: 'https://github.com/notdeltaxd/Gaana-API',
+    license: 'Apache-2.0',
+    notice: 'Please retain attribution when using this project.'
+  }))
+})
+
 /**
  * Root endpoint - API information and documentation.
  * Returns API version, status, and available endpoints.
@@ -32,42 +66,40 @@ apiApp.use('*', errorHandler)
  * @returns {Object} API information object
  */
 apiApp.get('/', (c) => {
-  return c.json({
-    message: '🎵 Gaana API',
-    version: '1.0.0',
-    status: 'running',
-    documentation: 'https://github.com/notdeltaxd/Gaana-API',
+  return c.json(gaanaService.formatResponse({
+    message: 'Welcome to the Unofficial Gaana API',
+    status: 'online',
     endpoints: {
       search: {
-        global: 'GET /api/search?q=query&limit=10',
-        songs: 'GET /api/search/songs?q=query&limit=10',
-        albums: 'GET /api/search/albums?q=query&limit=10',
-        playlists: 'GET /api/search/playlists?q=query&limit=10',
-        artists: 'GET /api/search/artists?q=query&limit=10'
+        global: '/api/search?q={query}&limit={n}',
+        songs: '/api/search/songs?q={query}&limit={n}',
+        albums: '/api/search/albums?q={query}&limit={n}',
+        playlists: '/api/search/playlists?q={query}&limit={n}',
+        artists: '/api/search/artists?q={query}&limit={n}'
       },
-      resources: {
-        song: 'GET /api/songs/:id or GET /api/songs?url=https://gaana.com/song/:id or GET /api/songs?seokey=:id',
-        album: 'GET /api/albums/:id or GET /api/albums?url=https://gaana.com/album/:id or GET /api/albums?seokey=:id',
-        playlist:
-          'GET /api/playlists/:id or GET /api/playlists?url=https://gaana.com/playlist/:id or GET /api/playlists?seokey=:id',
-        artist:
-          'GET /api/artists/:id or GET /api/artists?url=https://gaana.com/artist/:id or GET /api/artists?seokey=:id'
+      details: {
+        song: '/api/songs/{seokey}',
+        album: '/api/albums/{seokey}',
+        playlist: '/api/playlists/{seokey}',
+        artist: '/api/artists/{seokey}',
+        lyrics: '/api/lyrics/{seokey}'
       },
       browse: {
-        trending: 'GET /api/trending?language=hi&limit=10',
-        charts: 'GET /api/charts?limit=10',
-        newReleases: 'GET /api/new-releases?language=hi',
-        albumList: 'GET /api/album-list?language=hindi&page=0'
+        trending: '/api/trending?language={hi,en}&limit={n}',
+        charts: '/api/charts?limit={n}',
+        newReleases: '/api/new-releases?language={hi,en}&page={n}',
+        albumList: '/api/album-list?language={hindi,punjabi...}&page={n}',
+        lyricsList: '/api/lyrics?page={n}'
       },
-      media_file: {
-        stream:
-          'GET /api/stream?track_id=<track_id>&quality=<quality> OR GET /api/stream/:trackId?quality=<quality> - Returns segment URLs (JSON)'
+      media: {
+        stream: '/api/stream/{track_id}?quality={low,medium,high}'
       },
       system: {
-        health: 'GET /api/health'
+        health: '/api/health',
+        credits: '/api/credits'
       }
     }
-  })
+  }))
 })
 
 // Register all REST API routes
@@ -81,14 +113,7 @@ apiApp.route('', router)
  * @returns {Response} JSON error response with 404 status
  */
 apiApp.notFound((ctx) => {
-  return ctx.json(
-    {
-      success: false,
-      error: 'Not found - check API documentation',
-      timestamp: new Date()
-    },
-    404
-  )
+  return ctx.json(gaanaService.formatResponse({ error: 'Not found - check API documentation' }), 404)
 })
 
 /**
@@ -102,6 +127,38 @@ app.use('*', cors())
 app.use('*', logger())
 app.use('*', prettyJSON())
 
+// Attribution header middleware
+app.use('*', async (c, next) => {
+  c.header(
+    'X-Powered-By',
+    'Unofficial Gaana API - https://github.com/notdeltaxd/Gaana-API'
+  )
+  c.header('X-Project-Author', 'notdeltaxd')
+  c.header('X-Project-Name', 'Unofficial Gaana API')
+  c.header('X-Project-Repository', 'https://github.com/notdeltaxd/Gaana-API')
+  c.header(
+    'Access-Control-Expose-Headers',
+    'X-Powered-By, X-Project-Author, X-Project-Name, X-Project-Repository'
+  )
+  await next()
+})
+
+/**
+ * Credits endpoint - Attribution information.
+ *
+ * @route GET /credits
+ * @returns {Object} Credits information object
+ */
+app.get('/credits', (c) => {
+  return c.json(gaanaService.formatResponse({
+    project: 'Unofficial Gaana API',
+    author: 'notdeltaxd',
+    repository: 'https://github.com/notdeltaxd/Gaana-API',
+    license: 'Apache-2.0',
+    notice: 'Please retain attribution when using this project.'
+  }))
+})
+
 /**
  * Root endpoint handler.
  * Shows API information and redirects users to /api
@@ -110,15 +167,11 @@ app.use('*', prettyJSON())
  * @returns {Object} Root endpoint information
  */
 app.get('/', (c) => {
-  return c.json({
-    message: '🎵 Gaana API',
-    version: '1.0.0',
-    status: 'running',
-    documentation: 'https://github.com/notdeltaxd/Gaana-API',
+  return c.json(gaanaService.formatResponse({
+    message: '🎵 Unofficial Gaana API is online!',
     note: 'All API endpoints are available at /api',
-    quickStart: 'Visit /api to see all available endpoints',
-    example: 'GET /api/search?q=despacito&limit=10'
-  })
+    quickStart: 'Visit /api to see all available endpoints'
+  }))
 })
 
 // Mount API app at /api
@@ -133,15 +186,19 @@ app.route('/api', apiApp)
  */
 app.notFound((ctx) => {
   return ctx.json(
-    {
-      success: false,
+    gaanaService.formatResponse({
       error: 'Not found - All API endpoints are available at /api',
       documentation: 'https://github.com/notdeltaxd/Gaana-API',
-      example: 'GET /api/search?q=despacito',
-      timestamp: new Date()
-    },
+      example: 'GET /api/search?q=despacito'
+    }),
     404
   )
 })
+
+// Show banner on startup
+// Only show here if in production (Vercel) or if run directly (bun run dev)
+if (process.env.VERCEL || (import.meta as any).main) {
+  showBanner()
+}
 
 export default app

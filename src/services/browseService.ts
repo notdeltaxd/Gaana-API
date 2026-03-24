@@ -33,14 +33,14 @@ export class BrowseService extends BaseService {
     const n = limit || 10
     const url = `${apiEndpoints.trendingUrl}&language=${lang}&n=${n}`
     const result = await this.fetchJson(url)
-    const formattedResult = await this.formatters.formatJsonTrending(result)
-
+    const formattedResult = await (this.formatters as any)._formatJsonTrending(result)
+    
     // If we have track seokeys, fetch the actual track data
     if (formattedResult.trackSeokeys && Array.isArray(formattedResult.trackSeokeys)) {
       const trackData = await this.details.getTrackInfo(formattedResult.trackSeokeys as string[])
       return { tracks: trackData }
     }
-
+    
     return formattedResult
   }
 
@@ -67,7 +67,7 @@ export class BrowseService extends BaseService {
     )
 
     if (!result || typeof result !== 'object') {
-      return this.formatters.formatJsonAlbumList([], 0, lang, pageNumber)
+      return (this.formatters as any)._formatJsonAlbumList([], 0, lang, pageNumber)
     }
 
     const response = result as {
@@ -78,7 +78,7 @@ export class BrowseService extends BaseService {
     const albums = Array.isArray(response.album) ? response.album : []
     const totalCount = typeof response.count === 'number' ? response.count : 0
 
-    return this.formatters.formatJsonAlbumList(albums, totalCount, lang, pageNumber)
+    return (this.formatters as any)._formatJsonAlbumList(albums, totalCount, lang, pageNumber)
   }
 
   /**
@@ -93,46 +93,50 @@ export class BrowseService extends BaseService {
     const entities = r.entities ?? []
     const charts: unknown[] = []
     for (let i = 0; i < Math.min(n, entities.length); i++) {
-      charts.push(await this.formatters.formatJsonCharts(entities[i]))
+      charts.push(await (this.formatters as any)._formatJsonCharts(entities[i]))
     }
     return charts
   }
 
   /**
-   * Get new releases
+   * Get new releases with pagination and language filtering.
+   * Returns a mixed list of newly released albums and tracks.
    */
-  async getNewReleases(language?: string): Promise<Record<string, unknown>> {
-    const lang = language || 'en'
-    const url = `${apiEndpoints.newReleasesUrl}${lang}`
-    const result = await this.fetchJson(url)
-    const formattedResult = await this.formatters.formatJsonNewReleases(result)
+  async getNewReleases(language?: string, page?: number, limit?: number): Promise<Record<string, unknown>> {
+    const lang = (language || 'english').trim().toLowerCase()
+    const pageNumber = page ?? 0
+    const url = `${apiEndpoints.newReleasesUrl}${encodeURIComponent(lang)}&page=${pageNumber}`
 
-    // Fetch actual track and album data
-    if (formattedResult.error) {
-      return formattedResult
-    }
+    const result = await this.fetchJson(
+      url,
+      'POST',
+      {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Referer: `https://gaana.com/newrelease/${lang}`
+      },
+      20000
+    )
 
-    const trackSeokeys = formattedResult.trackSeokeys as string[] | undefined
-    const albumSeokeys = formattedResult.albumSeokeys as string[] | undefined
+    return await (this.formatters as any)._formatJsonNewReleases(result)
+  }
 
-    const data: Record<string, unknown> = {}
+  /**
+   * Get list of tracks with lyrics.
+   */
+  async getLyricsList(page?: number): Promise<Record<string, unknown>> {
+    const pageNumber = page ?? 0
+    const url = `${apiEndpoints.lyricsListUrl}${pageNumber}`
 
-    if (trackSeokeys && trackSeokeys.length > 0) {
-      data.tracks = await this.details.getTrackInfo(trackSeokeys)
-    } else {
-      data.tracks = []
-    }
+    const result = await this.fetchJson(
+      url,
+      'POST',
+      {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Referer: 'https://gaana.com/lyrics'
+      },
+      20000
+    )
 
-    if (albumSeokeys && albumSeokeys.length > 0) {
-      const albumData: unknown[] = []
-      for (const albumSeokey of albumSeokeys) {
-        albumData.push(await this.details.getAlbumInfo(albumSeokey, false))
-      }
-      data.albums = albumData
-    } else {
-      data.albums = []
-    }
-
-    return data
+    return (this.formatters as any)._formatJsonLyricsList(result, pageNumber)
   }
 }

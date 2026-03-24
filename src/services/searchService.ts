@@ -52,7 +52,7 @@ export class SearchService extends BaseService {
         if (!detailResult || typeof detailResult !== 'object') return null
         const res = detailResult as { tracks: Array<Record<string, unknown>> }
         if (res.tracks && res.tracks.length > 0) {
-          return await this.formatters.formatJsonSongDetails(res.tracks[0])
+          return await this.formatters._formatJsonSongDetails(res.tracks[0])
         }
         return null
       } catch {
@@ -102,7 +102,7 @@ export class SearchService extends BaseService {
       try {
         const detailResult = await this.fetchJson(apiEndpoints.albumDetailsUrl + seokey, 'POST', {}, 3000)
         if (!detailResult || typeof detailResult !== 'object') return null
-        return await this.formatters.formatJsonAlbumDetails(detailResult)
+        return await this.formatters._formatJsonAlbumDetails(detailResult)
       } catch {
         // Skip failed requests
         return null
@@ -129,7 +129,7 @@ export class SearchService extends BaseService {
   async searchPlaylists(q: string, limit: number): Promise<unknown[]> {
     const url = `${apiEndpoints.playlistSearchUrl}${encodeURIComponent(q)}`
     const result = await this.fetchJson(url)
-    return this.formatters.formatJsonPlaylistSearch(result, limit)
+    return this.formatters._formatJsonPlaylistSearch(result, limit)
   }
 
   /**

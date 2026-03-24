@@ -58,7 +58,7 @@ export class DetailsService extends BaseService {
         if (!result || typeof result !== 'object') return null
         const res = result as { tracks: Array<Record<string, unknown>> }
         if (res.tracks && res.tracks.length > 0) {
-          return await this.formatters.formatJsonSongDetails(res.tracks[0])
+          return await this.formatters._formatJsonSongDetails(res.tracks[0])
         }
         return null
       } catch (error) {
@@ -98,7 +98,7 @@ export class DetailsService extends BaseService {
       return { error: 'Song not found' }
     }
 
-    return await this.formatters.formatJsonSongFullDetails(r.tracks[0])
+    return await (this.formatters as any).formatJsonSongFullDetails(r.tracks[0])
   }
 
   /**
@@ -119,7 +119,7 @@ export class DetailsService extends BaseService {
       return { error: 'Album not found' }
     }
 
-    const albumData = await this.formatters.formatJsonAlbums(result, includeTracksFlag ?? true)
+    const albumData = await this.formatters._formatJsonAlbums(result, includeTracksFlag ?? true)
 
     // Check if formatting returned an error
     if (albumData.error) {
@@ -172,7 +172,7 @@ export class DetailsService extends BaseService {
     }
 
     // formatJsonPlaylists now formats tracks directly from the response
-    const playlistData = await this.formatters.formatJsonPlaylists(result)
+    const playlistData = await this.formatters._formatJsonPlaylists(result)
 
     // Check if formatting returned an error
     if (playlistData.error) {
@@ -201,7 +201,7 @@ export class DetailsService extends BaseService {
     }
 
     // Format artist info
-    const artistInfo = await this.formatters.formatJsonArtistInfo(result)
+    const artistInfo = await this.formatters._formatJsonArtistInfo(result)
     if (artistInfo.error) {
       return artistInfo
     }
@@ -218,7 +218,7 @@ export class DetailsService extends BaseService {
       const topTracksResult = await this.fetchJson(topTracksUrl)
 
       // Format top tracks directly from API response (same format as song details)
-      const topTracks = await this.formatters.formatJsonArtistTopTracks(topTracksResult)
+      const topTracks = await this.formatters._formatJsonArtistTopTracks(topTracksResult)
 
       // Combine artist info with top tracks
       return {
@@ -232,5 +232,23 @@ export class DetailsService extends BaseService {
         top_tracks: []
       }
     }
+  }
+
+  /**
+   * Get lyrics for a song by seokey.
+   */
+  async getSongLyrics(seokey: string): Promise<Record<string, unknown>> {
+    const url = apiEndpoints.songLyricsUrl + seokey
+    const result = await this.fetchJson(
+      url,
+      'POST',
+      {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Referer: `https://gaana.com/lyrics/${seokey}`
+      },
+      20000
+    )
+
+    return (this.formatters as any)._formatJsonSongLyrics(result)
   }
 }

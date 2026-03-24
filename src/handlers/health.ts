@@ -5,6 +5,7 @@
  */
 
 import { Context } from 'hono'
+import { gaanaService } from '../services/instances.js'
 
 /**
  * Handles GET requests for health check.
@@ -20,10 +21,9 @@ import { Context } from 'hono'
  * ```
  */
 export async function handleHealth(c: Context) {
-  return c.json({
+  return c.json(gaanaService.formatResponse({
     status: 'ok',
-    timestamp: new Date(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development'
-  })
+  }))
 }

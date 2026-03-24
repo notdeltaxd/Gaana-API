@@ -53,11 +53,7 @@ export async function handleSearch(c: Context) {
       artists: artists.status === 'fulfilled' ? artists.value : []
     }
 
-    return c.json({
-      success: true,
-      data: results,
-      timestamp: new Date().toISOString()
-    })
+    return c.json(gaanaService.formatResponse(results))
   } catch (err) {
     console.error('Global search error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Search failed' }, 500)

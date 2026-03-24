@@ -43,7 +43,7 @@ export async function handleTrending(c: Context) {
       languageValidation.data || '',
       limitValidation.data
     )
-    return c.json(trendingData)
+    return c.json(gaanaService.formatResponse(trendingData))
   } catch (err) {
     console.error('Trending error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get trending' }, 500)

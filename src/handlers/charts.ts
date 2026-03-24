@@ -33,7 +33,7 @@ export async function handleCharts(c: Context) {
 
   try {
     const chartsData = await gaanaService.getCharts(limitValidation.data)
-    return c.json(chartsData)
+    return c.json(gaanaService.formatResponse(chartsData))
   } catch (err) {
     console.error('Charts error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get charts' }, 500)

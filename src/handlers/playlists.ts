@@ -60,7 +60,7 @@ export async function handleGetPlaylist(c: Context) {
       return c.json(playlistInfo, 404)
     }
 
-    return c.json(playlistInfo)
+    return c.json(gaanaService.formatResponse(playlistInfo))
   } catch (err) {
     console.error('Get playlist error:', err)
     const errorMessage = err instanceof Error ? err.message : 'Failed to get playlist'

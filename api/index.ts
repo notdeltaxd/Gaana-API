@@ -7,6 +7,7 @@
 import { handle } from '@hono/node-server/vercel'
 import { serve } from '@hono/node-server'
 import app from '../src/index.js'
+import { showBanner } from '../src/utils/banner.js'
 
 /**
  * Vercel API configuration.
@@ -35,8 +36,7 @@ if (!process.env.VERCEL) {
       port
     },
     (info) => {
-      console.log(`🚀 Server running on http://localhost:${info.port}`)
-      console.log(`📚 API Base: http://localhost:${info.port}/api`)
+      showBanner(info.port)
     }
   )
 }

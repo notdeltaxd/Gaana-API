@@ -1,0 +1,28 @@
+Unofficial Gaana API
+Copyright (c) 2026 notdeltaxd
+
+Repository:
+https://github.com/notdeltaxd/Gaana-API
+
+Attribution Requirement
+
+If you use this project, integrate it into another project,
+or build a service using this software, you must provide clear
+and visible credit to the original project.
+
+Example attribution:
+
+"Unofficial Gaana API by notdeltaxd
+https://github.com/notdeltaxd/Gaana-API"
+
+The original copyright notice, license, and this NOTICE file
+must not be removed from the source code or redistributed copies.
+
+Disclaimer
+
+This project is an unofficial API wrapper for Gaana and is not
+affiliated with, endorsed by, or associated with Gaana or its
+parent companies.
+
+This project is intended for educational and research purposes.
+Use responsibly and respect Gaana's Terms of Service.

@@ -6,6 +6,7 @@
 
 import { Context } from 'hono'
 import { fetchStreamUrl } from '../utils/crypto.js'
+import { gaanaService } from '../services/instances.js'
 
 /**
  * Handles GET requests for stream URLs by track ID.
@@ -58,7 +59,7 @@ export async function handleGetStream(c: Context) {
       return c.json({ error: 'Failed to get stream URL' }, 404)
     }
 
-    return c.json(streamUrl)
+    return c.json(gaanaService.formatResponse(streamUrl))
   } catch (err) {
     console.error('Get stream URL error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get stream URL' }, 500)

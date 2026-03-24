@@ -8,6 +8,7 @@
 import { SearchService } from './searchService.js'
 import { DetailsService } from './detailsService.js'
 import { BrowseService } from './browseService.js'
+import { FormattersService } from './formattersService.js'
 import { Functions } from '../utils/functions.js'
 import { Errors } from '../utils/errors.js'
 
@@ -15,6 +16,7 @@ import { Errors } from '../utils/errors.js'
 const searchService = new SearchService()
 const detailsService = new DetailsService()
 const browseService = new BrowseService()
+const formatters = new FormattersService()
 const functions = new Functions()
 const errors = new Errors()
 
@@ -26,6 +28,9 @@ const errors = new Errors()
  * @constant
  */
 export const gaanaService = {
+  // Utility for wrapping responses
+  formatResponse: (data: any, extraMeta?: any) => formatters.wrapResponse(data, extraMeta),
+
   // Search operations
   searchSongs: (q: string, limit: number) => searchService.searchSongs(q, limit),
   searchAlbums: (q: string, limit: number) => searchService.searchAlbums(q, limit),
@@ -42,8 +47,12 @@ export const gaanaService = {
   // Browse operations
   getTrendingTracks: (language?: string, limit?: number) => browseService.getTrendingTracks(language, limit),
   getCharts: (limit?: number) => browseService.getCharts(limit),
-  getNewReleases: (language?: string) => browseService.getNewReleases(language),
-  getAlbumList: (language?: string, page?: number) => browseService.getAlbumList(language, page)
+  getNewReleases: (language?: string, page?: number, limit?: number) => browseService.getNewReleases(language, page, limit),
+  getAlbumList: (language?: string, page?: number) => browseService.getAlbumList(language, page),
+
+  // Lyrics operations
+  getLyricsList: (page?: number) => browseService.getLyricsList(page),
+  getSongLyrics: (seokey: string) => detailsService.getSongLyrics(seokey)
 }
 
 export { functions, errors }

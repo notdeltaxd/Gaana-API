@@ -50,7 +50,7 @@ export async function handleGetArtist(c: Context) {
       return c.json(artistInfo, 404)
     }
     
-    return c.json(artistInfo)
+    return c.json(gaanaService.formatResponse(artistInfo))
   } catch (err) {
     console.error('Get artist error:', err)
     return c.json({ error: err instanceof Error ? err.message : 'Failed to get artist' }, 500)
