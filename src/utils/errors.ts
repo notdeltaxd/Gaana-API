@@ -1,17 +1,22 @@
 /**
- * @fileoverview Standardized error messages and error response utilities.
+ * @fileoverview Standardized professional error messages and error response utilities.
  * @module utils/errors
  */
 
 /**
- * Standard error messages used across the API.
+ * Standard professional error messages used across the API.
+ * Follows a clean, descriptive style suitable for production environments.
  * @constant
  */
 export const ERROR_MESSAGES = {
-  INVALID_SEOKEY: 'Missing or invalid seokey.',
-  NO_RESULTS: 'Unable to find any results!',
-  MISSING_QUERY: 'Missing required query parameter: q',
-  MISSING_SEOKEY: 'Missing required query parameter: seokey'
+  INVALID_SEOKEY: 'The provided seokey is invalid or formatted incorrectly.',
+  NO_RESULTS: 'No results were found matching your request.',
+  MISSING_QUERY: "The required query parameter 'q' is missing.",
+  MISSING_SEOKEY: "The required query parameter 'seokey' is missing.",
+  UNAUTHORIZED: 'Full authentication is required to access this resource.',
+  FORBIDDEN: 'Access to this resource is denied.',
+  NOT_FOUND: 'The requested resource could not be found.',
+  INTERNAL_ERROR: 'An unexpected error occurred while processing your request.'
 } as const
 
 /**

@@ -100,7 +100,13 @@ export interface Track {
 export interface ApiResponse<T> {
   success: boolean
   data?: T
-  error?: string
+  error?: {
+    message: string
+    code: string
+    status: number
+    requestId: string
+    docs?: string
+  }
   timestamp: Date
 }
 

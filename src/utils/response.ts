@@ -15,12 +15,6 @@ import type { ApiResponse } from '../types/index.js'
  * @param {T} data - Response data payload
  * @param {number} [statusCode=HTTP_STATUS.OK] - HTTP status code (default: 200)
  * @returns {Response} JSON response with success format
- *
- * @example
- * ```typescript
- * return sendSuccess(c, { songs: [...] }, 200)
- * // Returns: { success: true, data: { songs: [...] }, timestamp: "..." }
- * ```
  */
 export const sendSuccess = <T>(ctx: Context, data: T, statusCode = HTTP_STATUS.OK) => {
   return ctx.json<ApiResponse<T>>(
@@ -29,31 +23,39 @@ export const sendSuccess = <T>(ctx: Context, data: T, statusCode = HTTP_STATUS.O
       data,
       timestamp: new Date()
     },
-    statusCode
+    statusCode as any
   )
 }
 
 /**
  * Sends an error JSON response with standardized format.
+ * Provides a nested error object following RESTful standards.
  *
  * @param {Context} ctx - Hono context object
- * @param {string} message - Error message to return
- * @param {number} [statusCode=HTTP_STATUS.INTERNAL_SERVER_ERROR] - HTTP status code (default: 500)
- * @returns {Response} JSON response with error format
- *
- * @example
- * ```typescript
- * return sendError(c, "Resource not found", 404)
- * // Returns: { success: false, error: "Resource not found", timestamp: "..." }
- * ```
+ * @param {string} message - Human-readable error message
+ * @param {number} [statusCode=HTTP_STATUS.INTERNAL_SERVER_ERROR] - HTTP status code
+ * @param {string} [code='INTERNAL_SERVER_ERROR'] - Error code slug for client-side handling
+ * @param {string} [requestId] - Unique request ID for tracking
+ * @returns {Response} JSON response with structured error format
  */
-export const sendError = (ctx: Context, message: string, statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR) => {
+export const sendError = (
+  ctx: Context,
+  message: string,
+  statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+  code: string = 'INTERNAL_SERVER_ERROR',
+  requestId: string = 'UNKNOWN'
+) => {
   return ctx.json<ApiResponse<null>>(
     {
       success: false,
-      error: message,
+      error: {
+        message,
+        code,
+        status: statusCode,
+        requestId
+      },
       timestamp: new Date()
     },
-    statusCode
+    statusCode as any
   )
 }

@@ -80,6 +80,60 @@ This ensures faster API response times when accessing Gaana's servers.
 
 ---
 
+## 🔐 Authentication
+
+If `API_KEY` is configured in your environment, all requests to `/api/*` endpoints must include a valid token. The API uses **timing-safe comparison** to protect against side-channel attacks and supports **multiple API keys**.
+
+Unauthorized requests will return a `401 Unauthorized` response with a professional error message.
+
+You can provide the token in two ways:
+
+1. **Authorization Header (Recommended)**
+   ```http
+   Authorization: Bearer your_secret_key_here
+   ```
+
+2. **Query Parameter**
+   ```http
+   GET /api/search?q=despacito&apiKey=your_secret_key_here
+   ```
+
+> [!TIP]
+   > You can set multiple valid API keys in your `.env` by separating them with commas: `API_KEY=key1,key2,key3`.
+
+---
+
+## 🛠️ Error Handling
+
+The API uses a standardized, production-ready error format designed for clarity and easy client-side integration. All error responses include a **unique Request ID** for server-side correlation and debugging.
+
+### Error Response Structure
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Full authentication is required to access this resource.",
+    "code": "UNAUTHORIZED",
+    "status": 401,
+    "requestId": "MWO0DMS0"
+  },
+  "timestamp": "2026-03-27T06:24:04.971Z"
+}
+```
+
+### Common Error Codes
+
+| Code | Status | Description |
+| --- | --- | --- |
+| `UNAUTHORIZED` | 401 | Missing or invalid API key |
+| `FORBIDDEN` | 403 | Access to the resource is denied |
+| `NOT_FOUND` | 404 | The requested resource could not be found |
+| `BAD_REQUEST` | 400 | The request is malformed or missing parameters |
+| `INTERNAL_SERVER_ERROR` | 500 | An unexpected server-side error occurred |
+
+---
+
 ## 📚 API Documentation
 
 ### Base URL
